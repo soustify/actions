@@ -82,13 +82,14 @@ runs:
     shell: bash
     run: mv ${{ inputs.terraform_directory }}/.terraform loaded-content
 
-
   - name: Upload artifact
     if: ${{ inputs.terraform_directory == '' }}
     uses: actions/upload-artifact@v4
     with:
       name: ${{ inputs.artifact_name }}
-      path: loaded-content
+      path: |
+        **.tf
+        loaded-content
       retention-days: 1
 
   - name: Upload artifact
@@ -97,6 +98,6 @@ runs:
     with:
       name: ${{ inputs.artifact_name }}
       path: |
-        ${{ inputs.terraform_directory }}
+        ${{ inputs.terraform_directory }}/**.tf
         ${{ inputs.terraform_directory }}/loaded-content
       retention-days: 1
