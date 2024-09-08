@@ -49,7 +49,8 @@ runs:
   - name: Show Files
     shell: bash
     run: |
-      ls -ltra
+      ls -a
+
 
   - name: Set permissions for Terraform providers
     shell: bash
