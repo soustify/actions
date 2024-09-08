@@ -73,6 +73,7 @@ runs:
   - name: Check Files
     shell: bash
     run: |
+      ls -a
       tree
 
 
