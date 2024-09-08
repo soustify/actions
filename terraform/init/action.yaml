@@ -88,8 +88,7 @@ runs:
     with:
       name: ${{ inputs.artifact_name }}
       path: |
-        **.tf
-        loaded-content
+        ./*
       retention-days: 1
 
   - name: Upload artifact
@@ -98,6 +97,5 @@ runs:
     with:
       name: ${{ inputs.artifact_name }}
       path: |
-        ${{ inputs.terraform_directory }}/**.tf
-        ${{ inputs.terraform_directory }}/loaded-content
+        ${{ inputs.terraform_directory }}/*
       retention-days: 1
