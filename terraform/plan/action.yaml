@@ -46,7 +46,6 @@ runs:
     with:
       name: ${{ inputs.artifact_name }}
 
-
   - name: Show Files
     shell: bash
     run: |
@@ -59,7 +58,6 @@ runs:
 
   - name: Terraform Plan
     shell: bash
-    if: ${{ inputs.terraform_directory == '' }}
     run: |
       terraform plan -no-color | tee terraform_plan.log
 
