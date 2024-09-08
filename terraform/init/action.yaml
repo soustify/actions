@@ -61,13 +61,13 @@ runs:
     shell: bash
     run: |
       cd ${{ inputs.terraform_directory }}
-      terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1 -no-color
+      terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
   - name: Terraform Init
     if: ${{ inputs.terraform_directory == '' }}
     shell: bash
     run: |
-      terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1 -no-color
+      terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
 
   - name: Check Files
