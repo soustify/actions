@@ -1,0 +1,49 @@
+name: 'Access Token'
+description: 'Generate Github Access Token By app'
+inputs:
+  github_app_id:
+    description: 'App Id'
+    required: true
+  github_installation_id:
+    description: 'Installation ID'
+    required: true
+  pem_key:
+    description: 'Private key'
+    required: true
+outputs:
+  access_token:
+    value: ${{ steps.generate_token.outputs.access_token }}
+    description: 'Access Token'
+runs:
+  using: composite
+  steps:
+
+  - name: Configurar Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.x'
+
+  - name: Install dependencies
+    shell: bash
+    run: |
+      python -m pip install --upgrade pip
+      pip install PyJWT requests cryptography
+
+  - name: Checkout script repository
+    uses: actions/checkout@v4
+    with:
+      repository: 'aksistech/actions'
+      path: code
+
+  - id: generate_token
+    name: Generate JWT and get access token
+    shell: bash
+    env:
+      APP_ID: ${{ inputs.github_app_id }}
+      INSTALLATION_ID: ${{ inputs.github_installation_id }}
+      PRIVATE_KEY: ${{ inputs.pem_key }}
+    run: |
+      python code/.github/scripts/generate_token.py
+      token=$(cat code/.github/scripts/access_token.txt)
+      echo "access_token=$token" >> $GITHUB_OUTPUT
+
