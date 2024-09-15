@@ -48,3 +48,10 @@ runs:
     run: |
       echo "Commit SHA: ${{ github.sha }}"
       GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+
+  - name: Upload artifact
+    uses: actions/upload-artifact@v4
+    with:
+      name: ${{ inputs.artifact_name }}
+      path: ${{ inputs.artifact_name }}
+      retention-days: 1
