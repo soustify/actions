@@ -47,18 +47,20 @@ runs:
     shell: bash
     run: go mod download
 
-  - name: Building Api
+  - name: Building Lambda
     shell: bash
     if: ${{ inputs.lambda_compile == 'true' }}
     run: |
       echo "Commit SHA: ${{ github.sha }}"
       GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
 
-  - name: Building Api
+  - name: Building Container
     shell: bash
     if: ${{ inputs.lambda_compile == 'false' }}
     run: |
       echo "Commit SHA: ${{ github.sha }}"
+      go mod verify
+      go mod vendor
       GOOS=linux go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
 
   - name: Upload artifact
