@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "default" {
   depends_on = [aws_iam_role.default]
-  function_name = local.function_name
+  function_name = var.function_name
   s3_bucket     = var.s3_bucket
   s3_key        = var.s3_key
   runtime       = var.runtime
