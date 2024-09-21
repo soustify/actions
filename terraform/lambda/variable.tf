@@ -52,6 +52,7 @@ variable "tags" {
 
 variable "vpc_id" {
   type = string
+  default = ""
 }
 
 variable "security_group_ids" {
