@@ -64,7 +64,7 @@ resource "aws_iam_role_policy" "network" {
 
 
 resource "aws_iam_role_policy_attachment" "notifier_policy" {
-  for_each   = length(var.policy_arns)
+  count      = length(var.policy_arns)
   role       = aws_iam_role.default.id
   policy_arn = var.policy_arns[count.index]
 }
