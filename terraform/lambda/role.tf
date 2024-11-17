@@ -1,5 +1,5 @@
 resource "aws_iam_role" "default" {
-  name = local.function_name
+  name = var.function_name
   tags = var.tags
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -51,13 +51,20 @@ data "aws_iam_policy_document" "network_interfaces" {
 
 
 resource "aws_iam_role_policy" "default" {
-  name   = "${local.function_name}-default"
+  name   = "${var.function_name}-default"
   role   = aws_iam_role.default.id
   policy = data.aws_iam_policy_document.default.json
 }
 
 resource "aws_iam_role_policy" "network" {
-  name   = "${local.function_name}-network"
+  name   = "${var.function_name}-network"
   role   = aws_iam_role.default.id
   policy = data.aws_iam_policy_document.network_interfaces.json
+}
+
+
+resource "aws_iam_role_policy_attachment" "notifier_policy" {
+  count      = length(var.policy_arns)
+  role       = aws_iam_role.default.id
+  policy_arn = var.policy_arns[count.index]
 }
