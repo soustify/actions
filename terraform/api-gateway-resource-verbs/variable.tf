@@ -25,6 +25,16 @@ variable "method_request_parameters" {
   default = {}
 }
 
+variable "method_request_validator_id" {
+  type = string
+  default = null
+}
+
+variable "method_request_models" {
+  type = map(string)
+  default = {}
+}
+
 variable "uri" {
   type = string
 }

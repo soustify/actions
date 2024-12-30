@@ -6,6 +6,8 @@ resource "aws_api_gateway_method" "default" {
   api_key_required  = var.api_key_required
   request_parameters = var.method_request_parameters
   authorizer_id      = var.authorizer_id
+  request_models = var.method_request_models
+  request_validator_id = var.method_request_validator_id
   lifecycle {
     create_before_destroy = true
   }
