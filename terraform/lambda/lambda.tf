@@ -10,6 +10,7 @@ resource "aws_lambda_function" "default" {
   memory_size   = var.memory_size
   source_code_hash = data.aws_s3_bucket_object.lambda_zip.etag
   architectures = ["arm64"]
+  
   dynamic "vpc_config" {
     for_each = local.vpc_config
     content {

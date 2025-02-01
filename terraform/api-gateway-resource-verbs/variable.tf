@@ -102,3 +102,8 @@ variable "authorizer_id" {
   type = string
   default = ""
 }
+
+variable "append_authorizer_on_request" {
+  type = bool
+  default = false
+}
