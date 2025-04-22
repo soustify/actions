@@ -72,6 +72,10 @@ jobs:
           unzip -o $PROTOC_ZIP -d $HOME/.local 'include/*'
           export PATH="$HOME/.local/bin:$PATH"
 
+      - name: Add protoc to PATH
+        run: |
+          sudo ln -sf $HOME/.local/bin/protoc /usr/local/bin/protoc
+
       - name: Install validation
         run: |
           git clone https://github.com/bufbuild/protoc-gen-validate.git
