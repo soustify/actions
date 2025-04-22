@@ -1,0 +1,132 @@
+name: Api Gateway
+
+on:
+  workflow_call:
+    inputs:
+      repository_name:
+        required: true
+        type: string
+
+      runner_name:
+        required: true
+        type: string
+
+
+      runner_category:
+        required: true
+        type: string
+
+      branch_name:
+        required: true
+        type: string
+
+      using_connect:
+        required: false
+        type: boolean
+        default: true
+
+      language:
+        required: true
+        type: string
+
+
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  compile-proto:
+    name: Create
+    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+
+      - name: Install Protobuf Compiler and Plugins
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.31.0
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+          export PATH="$PATH:$(go env GOPATH)/bin"
+          git clone https://github.com/bufbuild/protoc-gen-validate.git
+          cd protoc-gen-validate
+          git checkout tags/v1.2.1-java
+          make build
+          git clone https://github.com/bufbuild/connect-go.git
+          cd connect-go/cmd/protoc-gen-connect-go
+          go build -o $HOME/go/bin/protoc-gen-connect-go
+
+      - name: Compile Proto Files for Go
+        if: inputs.using_connect == 'true' && inputs.language == 'go'
+        run: |
+          mkdir -p golang
+          protoc --proto_path=proto --go_out=golang --go-grpc_out=golang proto/*.proto --validate_out="lang=go:golang" --connect-go_out=golang --connect-go_opt=package_suffix=rest
+
+      - name: Compile Proto Files for Go
+        if: inputs.using_connect == 'false' && inputs.language == 'go'
+        run: |
+          mkdir -p golang
+          protoc --proto_path=proto --go_out=golang --go-grpc_out=golang proto/*.proto --validate_out="lang=go:golang"
+
+
+      - name: Move Files
+        if: inputs.language == 'go'
+        run: |
+          cd golang
+          tree
+          mv github.com/soustify/${{ inputs.repository_name }}/pkg/* .
+          rm -rf github.com
+
+      - name: Upload Generated Code
+        if: inputs.language == 'go'
+        uses: actions/upload-artifact@v4
+        with:
+          name: golang-artifact
+          path: golang
+          retention-days: 1
+
+
+  publish:
+    name: 'Publish'
+    if: inputs.language == 'go'
+    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    needs: compile-proto
+    steps:
+      - name: 'download-source'
+        uses: actions/download-artifact@v4
+        with:
+          name: golang-artifact
+
+      - name: 'Show data'
+        run: "ls -ltra"
+
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          repository: soustify/${{ github.event.repository.name }}-proto-go
+          token: ${{ secrets.PAT_TOKEN }}
+          ref: ${{ github.ref_name }}
+          path: target-${{ github.event.repository.name }}-go
+
+
+      - name: Clean and copy golang classes to target repository
+        run: |
+          rm -rf target-${{ github.event.repository.name }}-go/pkg/
+          mkdir -p target-${{ github.event.repository.name }}-go/pkg/ports
+          cp -R ports/* target-${{ github.event.repository.name }}-go/pkg/ports
+
+      - name: Commit and push changes golang
+        working-directory: target-${{ github.event.repository.name }}-go
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          git add .
+          git commit -m "Atualiza structs golang geradas a partir dos arquivos Protobuf" || echo "Sem alterações para commit"
+          git push origin ${{ github.ref_name }}
