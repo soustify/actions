@@ -29,6 +29,11 @@ on:
         required: true
         type: string
 
+      proto_folder:
+        required: false
+        type: string
+        default: 'proto'
+
 
 
 concurrency:
@@ -82,13 +87,13 @@ jobs:
         if: inputs.using_connect == 'true' && inputs.language == 'go'
         run: |
           mkdir -p golang
-          protoc --proto_path=proto --go_out=golang --go-grpc_out=golang proto/*.proto --validate_out="lang=go:golang" --connect-go_out=golang --connect-go_opt=package_suffix=rest
+          protoc --proto_path=${{inputs.proto_folder}} --go_out=golang --go-grpc_out=golang ${{inputs.proto_folder}}/*.proto --validate_out="lang=go:golang" --connect-go_out=golang --connect-go_opt=package_suffix=rest
 
       - name: Compile Proto Files for Go
         if: inputs.using_connect == 'false' && inputs.language == 'go'
         run: |
           mkdir -p golang
-          protoc --proto_path=proto --go_out=golang --go-grpc_out=golang proto/*.proto --validate_out="lang=go:golang"
+          protoc --proto_path=${{inputs.proto_folder}} --go_out=golang --go-grpc_out=golang ${{inputs.proto_folder}}/*.proto --validate_out="lang=go:golang"
 
 
       - name: Move Files
