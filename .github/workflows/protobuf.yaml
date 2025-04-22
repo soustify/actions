@@ -103,6 +103,8 @@ jobs:
       - name: Move Files
         if: inputs.language == 'go'
         run: |
+          pwd
+          ls -ltra
           cd golang
           tree
           mv github.com/soustify/${{ inputs.repository_name }}/pkg/* .
