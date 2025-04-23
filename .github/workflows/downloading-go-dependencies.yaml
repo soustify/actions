@@ -20,10 +20,6 @@ on:
         type: string
         default: '^1.21'
 
-concurrency:
-  group: '${{ github.workflow }}-${{ github.ref }}'
-  cancel-in-progress: true
-
 jobs:
   downloading:
     name: download go dependencies
