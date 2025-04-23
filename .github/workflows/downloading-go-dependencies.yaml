@@ -19,10 +19,6 @@ on:
         required: false
         type: string
         default: '^1.21'
-      action_ref:
-        required: true
-        type: string
-        default: 'v0.3.2'
 jobs:
   downloading:
     name: download go dependencies
@@ -32,11 +28,27 @@ jobs:
       run: |
         git config --global url."https://${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
-    - name: Downloading go dependencies
-      uses: soustify/actions/.github/actions/golang-download@${{ inputs.action_ref }}
-      env:
-        GO111MODULE: on
-        GOPROXY: direct
-        GOSUMDB: off
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - uses: actions/cache@v4
       with:
-        go-version: '${{ inputs.go_version }}'
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go_version }}
+
+    - name: Tidy
+      shell: bash
+      run: go mod tidy
+
+    - name: Download dependencies
+      shell: bash
+      run: go mod download
