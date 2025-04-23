@@ -31,6 +31,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go_version }}
+
     - uses: actions/cache@v4
       with:
         path: |
@@ -40,10 +46,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-go-
 
-    - name: Set up Go
-      uses: actions/setup-go@v5
-      with:
-        go-version: ${{ inputs.go_version }}
 
     - name: Tidy
       shell: bash
