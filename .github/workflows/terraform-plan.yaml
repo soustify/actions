@@ -1,0 +1,102 @@
+name: Terraform Plan
+
+on:
+  workflow_call:
+    inputs:
+      repository_name:
+        required: true
+        type: string
+      runner_name:
+        required: true
+        type: string
+      runner_category:
+        required: true
+        type: string
+      branch_name:
+        required: true
+        type: string
+      aws_account_number:
+        required: false
+        type: string
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
+
+jobs:
+  terraform-init:
+    name: init
+    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: false
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ secrets.AWS_ROLE_NAME }}
+        role-session-name: ${{ secrets.AWS_ROLE_NAME }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Prepare Terraform plugin cache dir
+      run: mkdir -p ~/.terraform.d/plugin-cache
+
+    - name: Cache Terraform providers & modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+          terraform/.terraform
+        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+    - name: Terraform Init
+      working-directory: terraform
+      run: |
+        terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+
+  terraform-plan:
+    name: init
+    needs: [ terraform-init ]
+    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: false
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ secrets.AWS_ROLE_NAME }}
+        role-session-name: ${{ secrets.AWS_ROLE_NAME }}
+        aws-region: ${{ inputs.aws_region }}
+
+    - name: Prepare Terraform plugin cache dir
+      run: mkdir -p ~/.terraform.d/plugin-cache
+
+    - name: Cache Terraform providers & modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+          terraform/.terraform
+        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+    - name: Terraform Init
+      working-directory: terraform
+      run: |
+        terraform plan
