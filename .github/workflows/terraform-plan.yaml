@@ -65,6 +65,7 @@ jobs:
   terraform-plan:
     name: init
     needs: [ terraform-init ]
+    environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
     steps:
     - name: Set up Node.js
