@@ -19,7 +19,10 @@ on:
         required: false
         type: string
         default: '^1.21'
-
+      action_ref:
+        required: true
+        type: string
+        default: 'v0.3.2'
 jobs:
   downloading:
     name: download go dependencies
@@ -30,7 +33,7 @@ jobs:
         git config --global url."https://${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
     - name: Downloading go dependencies
-      uses: ./.github/actions/golang-download
+      uses: soustify/actions/.github/actions/golang-download@${{ inputs.action_ref }}
       env:
         GO111MODULE: on
         GOPROXY: direct
