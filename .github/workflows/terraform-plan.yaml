@@ -95,7 +95,22 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-terraform-
 
-    - name: Terraform Init
-      working-directory: terraform
+    - name: Check Has Changes
+      id: terraform_plan_has_changes
+      shell: bash
       run: |
-        terraform plan
+        terraform plan -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
+
+    - name: Do something with Terraform plan output
+      if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
+      shell: bash
+      run: |
+        terraform plan -no-color | tee changes.txt
+
+    - name: Upload artifact
+      if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
+      uses: actions/upload-artifact@v4
+      with:
+        name: changes.txt
+        path: changes.txt
+        retention-days: 1
