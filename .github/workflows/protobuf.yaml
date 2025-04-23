@@ -1,4 +1,4 @@
-name: Api Gateway
+name: Generate Protobuf
 
 on:
   workflow_call:

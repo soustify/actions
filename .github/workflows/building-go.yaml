@@ -1,0 +1,50 @@
+name: Building Go
+
+on:
+  workflow_call:
+    inputs:
+      repository_name:
+        required: true
+        type: string
+      runner_name:
+        required: true
+        type: string
+      runner_category:
+        required: true
+        type: string
+      branch_name:
+        required: true
+        type: string
+      path_secret:
+        required: true
+        type: string
+      go_version:
+        required: false
+        type: string
+        default: '^1.21'
+      tag:
+        required: true
+        type: string
+        default: 'v0.2.8'
+
+concurrency:
+  group: '${{ github.workflow }}-${{ github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  compile-proto:
+    name: compile
+    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    steps:
+      - name: Configure Git credentials
+        run: |
+          git config --global url."https://${{ inputs.path_secret }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Downloading go dependencies
+        uses: 'soustify/actions/.github/actions/golang-download@${{ inputs.tag }}'
+        env:
+          GO111MODULE: on
+          GOPROXY: direct
+          GOSUMDB: off
+        with:
+          go-version: '^1.21'
