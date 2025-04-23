@@ -15,9 +15,6 @@ on:
       branch_name:
         required: true
         type: string
-      path_secret:
-        required: true
-        type: string
       go_version:
         required: false
         type: string
@@ -34,7 +31,7 @@ jobs:
     steps:
     - name: Configure Git credentials
       run: |
-        git config --global url."https://${{ inputs.path_secret }}@github.com/".insteadOf "https://github.com/"
+        git config --global url."https://${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
 
     - name: Downloading go dependencies
       uses: ./.github/actions/golang-download
