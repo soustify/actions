@@ -26,10 +26,6 @@ runs:
     with:
       go-version: ${{ inputs.go-version }}
 
-  - name: Clean mod cache
-    run: go clean --modcache
-    shell: bash
-
   - name: Tidy
     shell: bash
     run: go mod tidy
