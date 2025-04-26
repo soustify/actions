@@ -122,10 +122,9 @@ jobs:
 
     - name: Download files
       uses: actions/upload-artifact@v4
-      working-directory: ${{ inputs.terraform_directory }}
       with:
         name: terraform-vars
-        path: ${{ inputs.values_file }}
+        path: ${{ inputs.terraform_directory }}/${{ inputs.values_file }}
 
     - name: Show Files
       working-directory: ${{ inputs.terraform_directory }}
