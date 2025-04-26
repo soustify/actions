@@ -15,9 +15,6 @@ on:
       branch_name:
         required: true
         type: string
-      aws_account_number:
-        required: false
-        type: string
       aws_region:
         required: false
         type: string
@@ -25,7 +22,11 @@ on:
       terraform_directory:
         required: false
         type: string
-
+#
+#      terraform_state_file: "${{ github.event.repository.name }}/terraform.tfstate"
+#      terraform_bucket_name: "${{ vars.TERRAFORM_BUCKET }}"
+#      aws_account_number: "${{ secrets.ACCOUNT_NUMBER_ENV }}"
+#      aws_role_name: "github-actions-${{ vars.ENVIRONMENT }}"
 
 jobs:
   terraform-init:
@@ -33,112 +34,126 @@ jobs:
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
     environment: ${{ github.ref_name }}
     steps:
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-          node-version: '20'
 
-    - uses: hashicorp/setup-terraform@v3
-      name: setup
-      with:
-          terraform_version: "1.5.0"
-
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
-        role-session-name: ${{ inputs.aws_role_name }}
-        aws-region: ${{ inputs.aws_region }}
-
-    - name: Prepare Terraform plugin cache dir
-      run: mkdir -p ~/.terraform.d/plugin-cache
-
-    - name: Cache Terraform providers & modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.terraform.d/plugin-cache
-          terraform/.terraform
-        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
-        restore-keys: |
-          ${{ runner.os }}-terraform-
-
-    - name: Terraform Init
-      working-directory: ${{ inputs.terraform_directory }}
+      name: echo
       run: |
-        terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+        echo "terraform_state_file: \"${{ github.event.repository.name }}/terraform.tfstate\""
+        echo "terraform_bucket_name: \"${{ vars.TERRAFORM_BUCKET }}\""
+        echo "aws_account_number: \"${{ secrets.ACCOUNT_NUMBER_ENV }}\""
+        echo "aws_role_name: \"github-actions-${{ vars.ENVIRONMENT }}\""
+  
 
-  terraform-plan:
-    name: plan
-    needs: [ terraform-init ]
-    environment: ${{ github.ref_name }}
-    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
-    steps:
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-          node-version: '20'
-
-    - uses: hashicorp/setup-terraform@v3
-      name: setup
-      with:
-          terraform_version: "1.5.0"
-
-
-    - name: configure aws credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
-        role-session-name: ${{ inputs.aws_role_name }}
-        aws-region: ${{ inputs.aws_region }}
-
-    - name: Prepare Terraform plugin cache dir
-      run: mkdir -p ~/.terraform.d/plugin-cache
-
-    - name: Cache Terraform providers & modules
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.terraform.d/plugin-cache
-          terraform/.terraform
-        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
-        restore-keys: |
-          ${{ runner.os }}-terraform-
-
-    - name: Check Has Changes
-      id: terraform_plan_has_changes
-      shell: bash
-      working-directory: ${{ inputs.terraform_directory }}
-      run: |
-        terraform plan -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
-
-    - name: Do something with Terraform plan output
-      if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
-      shell: bash
-      working-directory: ${{ inputs.terraform_directory }}
-      run: |
-        terraform plan -no-color | tee changes.txt
-
-    - name: Upload artifact
-      if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
-      uses: actions/upload-artifact@v4
-      working-directory: terraform
-      with:
-        name: changes.txt
-        path: changes.txt
-        retention-days: 1
+#  terraform-init:
+#    name: init
+#    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+#    environment: ${{ github.ref_name }}
+#    steps:
+#    - name: Set up Node.js
+#      uses: actions/setup-node@v4
+#      with:
+#          node-version: '20'
+#
+#    - uses: hashicorp/setup-terraform@v3
+#      name: setup
+#      with:
+#          terraform_version: "1.5.0"
+#
+#
+#    - name: Checkout code
+#      uses: actions/checkout@v4
+#
+#    - name: configure aws credentials
+#      uses: aws-actions/configure-aws-credentials@v4
+#      with:
+#        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+#        role-session-name: ${{ inputs.aws_role_name }}
+#        aws-region: ${{ inputs.aws_region }}
+#
+#    - name: Prepare Terraform plugin cache dir
+#      run: mkdir -p ~/.terraform.d/plugin-cache
+#
+#    - name: Cache Terraform providers & modules
+#      uses: actions/cache@v4
+#      with:
+#        path: |
+#          ~/.terraform.d/plugin-cache
+#          terraform/.terraform
+#        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
+#        restore-keys: |
+#          ${{ runner.os }}-terraform-
+#
+#    - name: Terraform Init
+#      working-directory: ${{ inputs.terraform_directory }}
+#      run: |
+#        terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+#
+#  terraform-plan:
+#    name: plan
+#    needs: [ terraform-init ]
+#    environment: ${{ github.ref_name }}
+#    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+#    steps:
+#    - name: Set up Node.js
+#      uses: actions/setup-node@v4
+#      with:
+#        node-version: '20'
+#
+#    - name: Checkout code
+#      uses: actions/checkout@v4
+#
+#    - name: Set up Node.js
+#      uses: actions/setup-node@v4
+#      with:
+#          node-version: '20'
+#
+#    - uses: hashicorp/setup-terraform@v3
+#      name: setup
+#      with:
+#          terraform_version: "1.5.0"
+#
+#
+#    - name: configure aws credentials
+#      uses: aws-actions/configure-aws-credentials@v4
+#      with:
+#        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+#        role-session-name: ${{ inputs.aws_role_name }}
+#        aws-region: ${{ inputs.aws_region }}
+#
+#    - name: Prepare Terraform plugin cache dir
+#      run: mkdir -p ~/.terraform.d/plugin-cache
+#
+#    - name: Cache Terraform providers & modules
+#      uses: actions/cache@v4
+#      with:
+#        path: |
+#          ~/.terraform.d/plugin-cache
+#          terraform/.terraform
+#        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
+#        restore-keys: |
+#          ${{ runner.os }}-terraform-
+#
+#    - name: Check Has Changes
+#      id: terraform_plan_has_changes
+#      shell: bash
+#      working-directory: ${{ inputs.terraform_directory }}
+#      run: |
+#        terraform plan -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
+#
+#    - name: Do something with Terraform plan output
+#      if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
+#      shell: bash
+#      working-directory: ${{ inputs.terraform_directory }}
+#      run: |
+#        terraform plan -no-color | tee changes.txt
+#
+#    - name: Upload artifact
+#      if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
+#      uses: actions/upload-artifact@v4
+#      working-directory: terraform
+#      with:
+#        name: changes.txt
+#        path: changes.txt
+#        retention-days: 1
 
 
 
