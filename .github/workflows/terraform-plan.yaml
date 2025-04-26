@@ -37,13 +37,6 @@ jobs:
       id-token: write
       contents: read
     steps:
-    - name: echo
-      run: |
-        echo "terraform_state_file: \"${{ github.event.repository.name }}/terraform.tfstate\""
-        echo "terraform_bucket_name: \"${{ vars.TERRAFORM_BUCKET }}\""
-        echo "aws_account_number: \"${{ vars.ACCOUNT_NUMBER_ENV }}\""
-        echo "aws_role_name: \"github-actions-${{ vars.ENVIRONMENT }}\""
-
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -82,7 +75,7 @@ jobs:
     - name: Terraform Init
       working-directory: ${{ inputs.terraform_directory }}
       run: |
-        terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+        terraform init -backend-config=bucket=${{ vars.TERRAFORM_BUCKET }} -backend-config=key=${{ github.event.repository.name }}/terraform.tfstate -backend-config=region=us-east-1
 
   terraform-plan:
     name: plan
