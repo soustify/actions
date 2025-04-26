@@ -1,0 +1,103 @@
+name: Building Go
+
+on:
+  workflow_call:
+    inputs:
+      repository_name:
+        required: true
+        type: string
+      runner_name:
+        required: true
+        type: string
+      runner_category:
+        required: true
+        type: string
+      branch_name:
+        required: true
+        type: string
+      go_version:
+        required: false
+        type: string
+        default: '^1.21'
+      is_lambda:
+        required: false
+        type: boolean
+        default: false
+      artifact_name:
+        required: true
+        type: string
+      artifact_main_path:
+        required: true
+        type: string
+
+jobs:
+  building:
+    name: building go
+    outputs:
+      md5: ${{ steps.md5.outputs.md5 }}
+    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    steps:
+    - name: Configure Git credentials
+      run: |
+        git config --global url."https://${{ secrets.PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ inputs.go_version }}
+        cache: false
+
+    - uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Tidy
+      shell: bash
+      run: go mod tidy
+
+    - name: Download dependencies
+      shell: bash
+      run: go mod download
+
+    - name: Building Container
+      if: inputs.is_lambda != true
+      run: |
+        go mod verify
+        go mod vendor
+        GOOS=linux go build -a -buildvcs=false -installsuffix cgo -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+
+
+    - name: Building Lambda
+      if: inputs.is_lambda == true
+      run: GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -ldflags "-X config.Sha=${{ github.sha }}" -o ${{ inputs.artifact_name }} ${{ inputs.artifact_main_path }}
+
+    - name: Calculate MD5
+      id: md5
+      run: |
+        MD5=$(md5sum ${{ inputs.artifact_name }} | cut -d ' ' -f 1)
+        echo "MD5=$MD5" >> "$GITHUB_ENV"
+
+    - name: Set Extended Attributes
+      run: |
+        setfattr -n user.application -v "${{ github.event.repository.name }}" ${{ inputs.artifact_name }}
+        setfattr -n user.artifact -v "${{ inputs.artifact_name }}" ${{ inputs.artifact_name }}
+        setfattr -n user.sha -v "${{ github.sha }}" ${{ inputs.artifact_name }}
+        setfattr -n user.md5 -v "$MD5" ${{ inputs.artifact_name }}
+        setfattr -n user.build_time -v "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" ${{ inputs.artifact_name }}
+        setfattr -n user.build_by -v "${{ github.actor }}" ${{ inputs.artifact_name }}
+        setfattr -n user.ref -v "${{ github.ref_name }}" ${{ inputs.artifact_name }}
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: ${{ inputs.artifact_name }}
+        retention-days: 1
