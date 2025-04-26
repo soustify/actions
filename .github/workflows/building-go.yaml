@@ -60,11 +60,9 @@ jobs:
           ${{ runner.os }}-go-
 
     - name: Tidy
-      shell: bash
       run: go mod tidy
 
     - name: Download dependencies
-      shell: bash
       run: go mod download
 
     - name: Building Container

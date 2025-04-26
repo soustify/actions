@@ -27,6 +27,7 @@ jobs:
   terraform-init:
     name: init
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    environment: ${{ github.ref_name }}
     steps:
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -62,7 +63,7 @@ jobs:
         terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
   terraform-plan:
-    name: init
+    name: plan
     needs: [ terraform-init ]
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
