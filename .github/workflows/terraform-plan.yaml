@@ -78,9 +78,10 @@ jobs:
 
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
+      if: github.ref_name == 'development'
       with:
-        role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_NUMBER_ENV }}:role/${{ secrets.AWS_ROLE_NAME }}
-        role-session-name: ${{ secrets.AWS_ROLE_NAME }}
+        role-to-assume: arn:aws:iam::977098993037:role/github-actions-development
+        role-session-name: github-actions-development
         aws-region: ${{ inputs.aws_region }}
 
     - name: Prepare Terraform plugin cache dir
