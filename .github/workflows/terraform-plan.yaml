@@ -114,3 +114,99 @@ jobs:
         name: changes.txt
         path: changes.txt
         retention-days: 1
+
+
+
+
+#    - name: Aprovação do Guilherme
+#      uses: trstringer/manual-approval@v1
+#      with:
+#        secret: ${{ github.TOKEN }}
+#        approvers: GuilhermeGiusti
+#        minimum-approvals: 1
+#        issue-title: "Aprovação final pelo Guilherme"
+#        issue-body: "Guilherme, avalie este deploy."
+
+
+#    - name: Aprovação genérica
+#      uses: trstringer/manual-approval@v1
+#      with:
+#        secret: ${{ secrets.APPROVER_TOKEN }}
+#        approvers: developers
+#        minimum-approvals: 1
+#        issue-title: "Aprovação genérica"
+#        issue-body: "Alguém do time, por favor aprove este deploy."
+
+#    - name: Exibir número da issue
+#      run: |
+#        echo "Issue criada: #${{ steps.manual_approval.outputs.issue-number }}"
+#        echo "Link: ${{ steps.manual_approval.outputs.issue-url }}"
+
+#    - name: Discord Webhook Action
+#      uses: tsickert/discord-webhook@v7.0.0
+#      with:
+#        webhook-url: ${{ secrets.DISCORD_WEBHOOK_NOTIFIER }}
+#        content: "Test"
+#
+#
+#    - name: Send Discord Webhook
+#      env:
+#        REPOSITORY: '${{ github.event.repository.name }}'
+#        BRANCH:     '${{ github.ref_name }}'
+#        COMMIT:     '${{ github.sha }}'
+#      run: |
+#        cat <<EOF > discord_payload.json
+#        {
+#          "content": "Execution Error in Terraform",
+#          "embeds": [
+#            {
+#              "color": 16711680,
+#              "fields": [
+#                { "name": "Repository", "value": "${REPOSITORY}", "inline": true },
+#                { "name": "Branch",     "value": "${BRANCH}",     "inline": true },
+#                { "name": "Github",     "value": "https://github.com/${REPOSITORY}/tree/${BRANCH}/terraform" },
+#                { "name": "Commit",     "value": "${COMMIT}" }
+#              ]
+#            }
+#          ],
+#          "image": {
+#            "url": "https://i.imgur.com/AfFp7pu.png"
+#          },
+#          "footer": {
+#            "text": "Some footer text here",
+#            "icon_url": "https://i.imgur.com/AfFp7pu.png"
+#          },
+#          "components": [
+#            {
+#              "type": 1,
+#              "components": [
+#                {
+#                  "type": 2,
+#                  "style": 1,
+#                  "label": "Check Changes",
+#                  "custom_id": "terraform_check_changes",
+#                  "emoji": { "name": "📦" }
+#                }
+#              ]
+#            },
+#            {
+#              "type": 1,
+#              "components": [
+#                {
+#                  "type": 2,
+#                  "style": 2,
+#                  "label": "Check Changes",
+#                  "custom_id": "terraform_check_changes_2",
+#                  "emoji": { "name": "📦" }
+#                }
+#              ]
+#            }
+#          ]
+#        }
+#
+#        EOF
+#    - name: Send to Discord via Webhook Action
+#      uses: tsickert/discord-webhook@v7.0.0
+#      with:
+#        webhook-url: ${{ secrets.DISCORD_WEBHOOK_NOTIFIER }}
+#        raw-data: discord_payload.json
