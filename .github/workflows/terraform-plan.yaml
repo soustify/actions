@@ -22,6 +22,10 @@ on:
         required: false
         type: string
         default: 'us-east-1'
+      terraform_directory:
+        required: false
+        type: string
+
 
 jobs:
   terraform-init:
@@ -45,10 +49,9 @@ jobs:
 
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: github.ref_name == 'development'
       with:
-        role-to-assume: arn:aws:iam::977098993037:role/github-actions-development
-        role-session-name: github-actions-development
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+        role-session-name: ${{ inputs.aws_role_name }}
         aws-region: ${{ inputs.aws_region }}
 
     - name: Prepare Terraform plugin cache dir
@@ -65,7 +68,7 @@ jobs:
           ${{ runner.os }}-terraform-
 
     - name: Terraform Init
-      working-directory: terraform
+      working-directory: ${{ inputs.terraform_directory }}
       run: |
         terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
@@ -96,10 +99,9 @@ jobs:
 
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
-      if: github.ref_name == 'development'
       with:
-        role-to-assume: arn:aws:iam::977098993037:role/github-actions-development
-        role-session-name: github-actions-development
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+        role-session-name: ${{ inputs.aws_role_name }}
         aws-region: ${{ inputs.aws_region }}
 
     - name: Prepare Terraform plugin cache dir
@@ -118,18 +120,21 @@ jobs:
     - name: Check Has Changes
       id: terraform_plan_has_changes
       shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
       run: |
         terraform plan -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
 
     - name: Do something with Terraform plan output
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
       shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
       run: |
         terraform plan -no-color | tee changes.txt
 
     - name: Upload artifact
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
       uses: actions/upload-artifact@v4
+      working-directory: terraform
       with:
         name: changes.txt
         path: changes.txt
