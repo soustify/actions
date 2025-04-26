@@ -125,4 +125,4 @@ jobs:
       shell: bash
       working-directory: ${{ inputs.terraform_directory }}
       run: |
-        terraform apply -auto-approve
+        terraform apply -var-file=${{ inputs.values_file }} -auto-approve

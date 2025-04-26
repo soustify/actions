@@ -22,11 +22,9 @@ on:
       terraform_directory:
         required: false
         type: string
-#
-#      terraform_state_file: "${{ github.event.repository.name }}/terraform.tfstate"
-#      terraform_bucket_name: "${{ vars.TERRAFORM_BUCKET }}"
-#      aws_account_number: "${{ secrets.ACCOUNT_NUMBER_ENV }}"
-#      aws_role_name: "github-actions-${{ vars.ENVIRONMENT }}"
+      values_file:
+        required: true
+        type: string
 
 jobs:
   terraform-init:
@@ -130,14 +128,14 @@ jobs:
       shell: bash
       working-directory: ${{ inputs.terraform_directory }}
       run: |
-        terraform plan -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
+        terraform plan -var-file=${{ inputs.values_file }} -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
 
     - name: Do something with Terraform plan output
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
       shell: bash
       working-directory: ${{ inputs.terraform_directory }}
       run: |
-        terraform plan -no-color | tee changes.txt
+        terraform plan -var-file=${{ inputs.values_file }} -no-color | tee changes.txt
 
     - name: Upload artifact
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
