@@ -33,12 +33,15 @@ jobs:
     name: init
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
     environment: ${{ github.ref_name }}
+    permissions:
+      id-token: write
+      contents: read
     steps:
     - name: echo
       run: |
         echo "terraform_state_file: \"${{ github.event.repository.name }}/terraform.tfstate\""
         echo "terraform_bucket_name: \"${{ vars.TERRAFORM_BUCKET }}\""
-        echo "aws_account_number: \"${{ secrets.ACCOUNT_NUMBER_ENV }}\""
+        echo "aws_account_number: \"${{ vars.ACCOUNT_NUMBER_ENV }}\""
         echo "aws_role_name: \"github-actions-${{ vars.ENVIRONMENT }}\""
 
 
@@ -86,6 +89,9 @@ jobs:
     needs: [ terraform-init ]
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    permissions:
+      id-token: write
+      contents: read
     steps:
     - name: Set up Node.js
       uses: actions/setup-node@v4
