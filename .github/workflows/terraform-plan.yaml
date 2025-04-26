@@ -127,6 +127,8 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: terraform-vars
+        path: ${{ inputs.values_file }}
+
 
     - name: Check Has Changes
       id: terraform_plan_has_changes
