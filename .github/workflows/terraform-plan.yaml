@@ -123,6 +123,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-terraform-
 
+    - name: Download files
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-vars
+
     - name: Check Has Changes
       id: terraform_plan_has_changes
       shell: bash

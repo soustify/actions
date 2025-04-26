@@ -99,6 +99,10 @@ jobs:
       with:
           terraform_version: "1.5.0"
 
+    - name: Download files
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-vars
 
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
