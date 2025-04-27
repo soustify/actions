@@ -41,6 +41,7 @@ on:
 jobs:
   building:
     name: Building Go
+    environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.branch_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
     env:
       GO111MODULE: on
