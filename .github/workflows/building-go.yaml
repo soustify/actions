@@ -29,6 +29,10 @@ on:
       artifact_main_path:
         required: true
         type: string
+      aws_region:
+        required: false
+        type: string
+        default: 'us-east-1'
     outputs:
       md5:
         description: "MD5 checksum of the built artifact"
