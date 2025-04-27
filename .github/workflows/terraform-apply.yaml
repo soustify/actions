@@ -22,6 +22,9 @@ on:
       terraform_directory:
         required: false
         type: string
+      values_file:
+        required: true
+        type: string
 
 jobs:
   terraform-init:
