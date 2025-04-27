@@ -120,16 +120,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-terraform-
 
-    - name: Download files
-      uses: actions/upload-artifact@v4
-      with:
-        name: terraform-vars
-        path: ${{ inputs.terraform_directory }}
-
-    - name: Show Files
-      working-directory: ${{ inputs.terraform_directory }}
-      run: ls -ltra
-
     - name: Check Has Changes
       id: terraform_plan_has_changes
       shell: bash
