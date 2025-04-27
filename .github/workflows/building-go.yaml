@@ -38,6 +38,10 @@ jobs:
   building:
     name: Building Go
     runs-on: ['${{ inputs.runner_name }}', '${{ inputs.branch_name }}', '${{ inputs.runner_category }}', "self-hosted", "linux", "x64", "amazon"]
+    env:
+      GO111MODULE: on
+      GOPROXY: direct
+      GOSUMDB: off
     outputs:
       md5: ${{ steps.calculate-md5.outputs.md5 }}
     steps:
@@ -98,9 +102,22 @@ jobs:
           setfattr -n user.build_by -v "${{ github.actor }}" ${{ inputs.artifact_name }}
           setfattr -n user.ref -v "${{ github.ref_name }}" ${{ inputs.artifact_name }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Rename ${{ steps.string-replace.outputs.replaced }}
+        run: |
+          mv ${{ inputs.artifact_name }} bootstrap
+          chmod +x bootstrap
+
+
+      - name: Zip the artifact-builded folder
+        run: zip -r artifact-builded.zip bootstrap
+
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: ${{ inputs.artifact_name }}
-          path: ${{ inputs.artifact_name }}
-          retention-days: 1
+          role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/github-actions-${{ vars.ENVIRONMENT }}
+          role-session-name: github-actions-${{ vars.ENVIRONMENT }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Upload to S3
+        run: |
+          aws s3 cp artifact-builded.zip s3://${{ secrets.LAMBDA_BUCKET }}/${{ github.event.repository.name }}/${{ inputs.artifact_name }}/${{ github.sha }}.zip
