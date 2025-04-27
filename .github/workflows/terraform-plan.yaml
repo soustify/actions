@@ -124,10 +124,10 @@ jobs:
           ${{ runner.os }}-terraform-
 
     - name: Download files
-      uses: actions/upload-artifact@v4
+      uses: actions/download-artifact@v4
       with:
         name: terraform-vars
-        path: ${{ inputs.terraform_directory }}/${{ inputs.values_file }}
+        path: ${{ inputs.terraform_directory }}
 
     - name: Check Has Changes
       id: terraform_plan_has_changes
