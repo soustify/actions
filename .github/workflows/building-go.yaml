@@ -126,9 +126,9 @@ jobs:
           role-session-name: github-actions-${{ vars.ENVIRONMENT }}
           aws-region: ${{ inputs.aws_region }}
 
-      - name: Upload to S3 if not exists
-        run: |
-          BUCKET="${{ secrets.LAMBDA_BUCKET }}"
-          KEY="${{ github.event.repository.name }}/${{ inputs.artifact_name }}/${{ github.sha }}.zip"
-          aws s3 cp artifact-builded.zip "s3://${BUCKET}/${KEY}"
-          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: ${{ inputs.artifact_name }}
+          retention-days: 1
