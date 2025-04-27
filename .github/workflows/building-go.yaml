@@ -128,16 +128,7 @@ jobs:
 
       - name: Upload to S3 if not exists
         run: |
-          set -e
-      
-          # Definindo variáveis
           BUCKET="${{ secrets.LAMBDA_BUCKET }}"
           KEY="${{ github.event.repository.name }}/${{ inputs.artifact_name }}/${{ github.sha }}.zip"
-      
-          # Tentando verificar se o objeto existe
-          if aws s3api head-object --bucket "$BUCKET" --key "$KEY"; then
-            echo "Object already exists in S3. Skipping upload."
-          else
-            echo "Object does not exist. Uploading..."
-            aws s3 cp artifact-builded.zip "s3://${BUCKET}/${KEY}"
-          fi
+          aws s3 cp artifact-builded.zip "s3://${BUCKET}/${KEY}"
+          
