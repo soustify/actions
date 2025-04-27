@@ -88,7 +88,7 @@ jobs:
         setfattr -n user.application -v "${{ github.event.repository.name }}" ${{ inputs.artifact_name }}
         setfattr -n user.artifact -v "${{ inputs.artifact_name }}" ${{ inputs.artifact_name }}
         setfattr -n user.sha -v "${{ github.sha }}" ${{ inputs.artifact_name }}
-        setfattr -n user.md5 -v "$MD5" ${{ inputs.artifact_name }}
+        setfattr -n user.md5 -v "${{ steps.md5.outputs.md5 }}" ${{ inputs.artifact_name }}
         setfattr -n user.build_time -v "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" ${{ inputs.artifact_name }}
         setfattr -n user.build_by -v "${{ github.actor }}" ${{ inputs.artifact_name }}
         setfattr -n user.ref -v "${{ github.ref_name }}" ${{ inputs.artifact_name }}
