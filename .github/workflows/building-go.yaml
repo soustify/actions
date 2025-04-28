@@ -110,13 +110,14 @@ jobs:
           setfattr -n user.build_by -v "${{ github.actor }}" ${{ inputs.artifact_name }}
           setfattr -n user.ref -v "${{ github.ref_name }}" ${{ inputs.artifact_name }}
 
-      - name: Rename ${{ steps.string-replace.outputs.replaced }}
+      - name: Rename
+        if: inputs.is_lambda == true
         run: |
           mv ${{ inputs.artifact_name }} bootstrap
           chmod +x bootstrap
 
-
       - name: Zip the artifact-builded folder
+        if: inputs.is_lambda == true
         run: zip -r artifact-builded.zip bootstrap
 
       - name: configure aws credentials
@@ -126,9 +127,7 @@ jobs:
           role-session-name: github-actions-${{ vars.ENVIRONMENT }}
           aws-region: ${{ inputs.aws_region }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ inputs.artifact_name }}
-          path: ${{ inputs.artifact_name }}
-          retention-days: 1
+      - name: Upload Aws S3
+        if: inputs.is_lambda == true
+        run: |
+          aws s3 cp artifact-builded.zip "s3://${{secret.LAMBDA_BUCKET}}/${{ github.event.repository.name }}/${{ inputs.artifact_name }}/${{ steps.calculate-md5.outputs.md5 }}.zip"
