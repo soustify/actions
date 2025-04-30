@@ -104,7 +104,7 @@ jobs:
         if: inputs.language == 'go'
         run: |
           cd golang
-          mv github.com/soustify/${{ inputs.repository_name }}/pkg/* .
+          mv github.com/soustify/${{ inputs.repository_name }}-proto-go/pkg/* .
           rm -rf github.com
 
       - name: Upload Generated Code
