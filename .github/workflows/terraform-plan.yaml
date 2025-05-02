@@ -33,6 +33,9 @@ on:
       terraform_directory:
         required: false
         type: string
+      values_file:
+        required: true
+        type: string
 jobs:
   terraform-init:
     name: init
@@ -153,14 +156,14 @@ jobs:
       working-directory: ${{ inputs.terraform_directory }}
       shell: bash
       run: |
-        terraform plan -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
+        terraform plan -no-color -var-file=${{ inputs.values_file }} -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
 
     - name: Do something with Terraform plan output
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
       working-directory: ${{ inputs.terraform_directory }}
       shell: bash
       run: |
-        terraform plan -no-color | tee changes.txt
+        terraform plan -var-file=${{ inputs.values_file }} -no-color | tee changes.txt
 
     - name: Upload artifact
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
@@ -211,14 +214,14 @@ jobs:
       shell: bash
       working-directory: ${{ inputs.terraform_directory }}
       run: |
-        terraform plan -no-color -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
+        terraform plan -no-color -var-file=${{ inputs.values_file }} -detailed-exitcode > result || echo "has_changes=$?" >> $GITHUB_OUTPUT
 
     - name: Do something with Terraform plan output
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
       shell: bash
       working-directory: ${{ inputs.terraform_directory }}
       run: |
-        terraform plan -no-color | tee changes.txt
+        terraform plan -no-color -var-file=${{ inputs.values_file }} | tee changes.txt
 
     - name: Upload artifact
       if: ${{ steps.terraform_plan_has_changes.outputs.has_changes }} > 0
