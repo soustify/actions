@@ -25,6 +25,10 @@ on:
       values_file:
         required: true
         type: string
+      terraform_state_file:
+        required: false
+        type: string
+        default: 'terraform.tfstate'
 
 jobs:
   terraform-apply:
@@ -77,7 +81,7 @@ jobs:
     - name: Terraform Init
       working-directory: ${{ inputs.terraform_directory }}
       run: |
-        terraform init -backend-config=bucket=${{ vars.TERRAFORM_BUCKET }} -backend-config=key=${{ github.event.repository.name }}/terraform.tfstate -backend-config=region=us-east-1
+        terraform init -backend-config=bucket=${{ vars.TERRAFORM_BUCKET }} -backend-config=key=${{ github.event.repository.name }}/${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
 
 
     - name: Download files
