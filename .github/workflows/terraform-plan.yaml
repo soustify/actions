@@ -113,7 +113,7 @@ jobs:
 
 
   terraform-ubuntu:
-    name: start
+    name: start ubuntu
     if: ${{ inputs.ubuntu_runner == true }}
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
