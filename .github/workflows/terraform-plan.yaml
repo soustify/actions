@@ -36,6 +36,11 @@ on:
       values_file:
         required: true
         type: string
+
+      vars_artifact:
+        required: false
+        type: string
+        default: 'terraform-vars'
 jobs:
   terraform-hosted:
     name: start hosted
@@ -86,7 +91,7 @@ jobs:
     - name: Download files
       uses: actions/download-artifact@v4
       with:
-        name: terraform-vars
+        name: "${{ inputs.vars_artifact }}"
         path: ${{ inputs.terraform_directory }}
 
     - name: Check Has Changes
@@ -160,7 +165,7 @@ jobs:
     - name: Download files
       uses: actions/download-artifact@v4
       with:
-        name: terraform-vars
+        name: "${{ inputs.vars_artifact }}"
         path: ${{ inputs.terraform_directory }}
 
     - name: Check Has Changes

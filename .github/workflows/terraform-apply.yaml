@@ -33,7 +33,10 @@ on:
         required: false
         type: string
         default: 'terraform.tfstate'
-
+      vars_artifact:
+        required: false
+        type: string
+        default: 'terraform-vars'
 
 jobs:
   terraform-apply-ubuntu:
@@ -93,7 +96,7 @@ jobs:
     - name: Download files
       uses: actions/download-artifact@v4
       with:
-        name: terraform-vars
+        name: "${{ inputs.vars_artifact }}"
         path: ${{ inputs.terraform_directory }}
 
 
@@ -161,7 +164,7 @@ jobs:
     - name: Download files
       uses: actions/download-artifact@v4
       with:
-        name: terraform-vars
+        name: "${{ inputs.vars_artifact }}"
         path: ${{ inputs.terraform_directory }}
 
 
