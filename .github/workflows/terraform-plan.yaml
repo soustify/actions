@@ -39,7 +39,7 @@ on:
 jobs:
   terraform-init:
     name: init
-    if: ubuntu_runner == false
+    if: ${{ inputs.ubuntu_runner == false }}
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
     steps:
     - name: Set up Node.js
@@ -79,7 +79,7 @@ jobs:
 
   terraform-init-ubuntu:
     name: init
-    if: ubuntu_runner == true
+    if: ${{ inputs.ubuntu_runner == true }}
     runs-on: ubuntu-latest
     steps:
     - name: Set up Node.js
@@ -119,7 +119,7 @@ jobs:
   terraform-plan:
     name: init
     needs: [ terraform-init ]
-    if: ubuntu_runner == false
+    if: ${{ inputs.ubuntu_runner == false }}
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
     steps:
@@ -177,7 +177,7 @@ jobs:
   terraform-plan-ubuntu:
     name: init
     needs: [ terraform-init-ubuntu ]
-    if: ubuntu_runner == true
+    if: ${{ inputs.ubuntu_runner == true }}
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name }}
     steps:
