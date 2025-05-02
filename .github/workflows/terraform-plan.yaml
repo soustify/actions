@@ -53,9 +53,10 @@ jobs:
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ secrets.AWS_ROLE_NAME }}
+        role-to-assume: arn:aws:iam::${{ secrets.ACCOUNT_NUMBER_ENV }}:role/${{ secrets.AWS_ROLE_NAME }}
         role-session-name: ${{ secrets.AWS_ROLE_NAME }}
         aws-region: ${{ inputs.aws_region }}
+
 
     - name: Prepare Terraform plugin cache dir
       working-directory: ${{ inputs.terraform_directory }}
