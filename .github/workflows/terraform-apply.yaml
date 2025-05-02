@@ -29,12 +29,15 @@ on:
         required: false
         type: string
         default: 'terraform.tfstate'
-
+      runs_on:
+        required: false
+        type: string
+        default: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
 jobs:
   terraform-apply:
     name: apply
     environment: ${{ github.ref_name }}
-    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+    runs-on: ${{ inputs.runs_on }}
     permissions:
       id-token: write
       contents: read
