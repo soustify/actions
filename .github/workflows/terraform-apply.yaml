@@ -37,7 +37,7 @@ on:
 
 jobs:
   terraform-apply-ubuntu:
-    name: apply
+    name: apply ubuntu
     if: ${{ inputs.ubuntu_runner == true }}
     environment: ${{ github.ref_name }}
     runs-on: 'ubuntu-latest'
@@ -105,7 +105,7 @@ jobs:
         terraform apply -var-file=${{ inputs.values_file }} -auto-approve
 
   terraform-apply:
-    name: apply
+    name: apply hosted
     if: ${{ inputs.ubuntu_runner == false }}
     environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
