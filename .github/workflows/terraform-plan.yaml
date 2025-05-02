@@ -54,10 +54,9 @@ jobs:
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/${{ secrets.AWS_ROLE_NAME }}
-        role-session-name: ${{ secrets.AWS_ROLE_NAME }}
-        aws-region: ${{ inputs.aws_region }}
-
+        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/github-actions-${{ github.ref_name }}
+        role-session-name: github-actions-${{ github.ref_name }}
+        aws-region: 'us-east-1'
 
     - name: Prepare Terraform plugin cache dir
       working-directory: ${{ inputs.terraform_directory }}
@@ -96,9 +95,9 @@ jobs:
     - name: Init Aws credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/${{ secrets.AWS_ROLE_NAME }}
-        role-session-name: ${{ secrets.AWS_ROLE_NAME }}
-        aws-region: ${{ inputs.aws_region }}
+        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/github-actions-${{ github.ref_name }}
+        role-session-name: github-actions-${{ github.ref_name }}
+        aws-region: 'us-east-1'
 
     - name: Prepare Terraform plugin cache dir
       run: mkdir -p ~/.terraform.d/plugin-cache
@@ -137,9 +136,9 @@ jobs:
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/${{ secrets.AWS_ROLE_NAME }}
-        role-session-name: ${{ secrets.AWS_ROLE_NAME }}
-        aws-region: ${{ inputs.aws_region }}
+        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/github-actions-${{ github.ref_name }}
+        role-session-name: github-actions-${{ github.ref_name }}
+        aws-region: 'us-east-1'
 
     - name: Prepare Terraform plugin cache dir
       run: mkdir -p ~/.terraform.d/plugin-cache
@@ -195,9 +194,9 @@ jobs:
     - name: configure aws credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/${{ secrets.AWS_ROLE_NAME }}
-        role-session-name: ${{ secrets.AWS_ROLE_NAME }}
-        aws-region: ${{ inputs.aws_region }}
+        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/github-actions-${{ github.ref_name }}
+        role-session-name: github-actions-${{ github.ref_name }}
+        aws-region: 'us-east-1'
 
     - name: Prepare Terraform plugin cache dir
       run: mkdir -p ~/.terraform.d/plugin-cache
