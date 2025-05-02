@@ -40,6 +40,7 @@ jobs:
   terraform-init:
     name: init
     if: ${{ inputs.ubuntu_runner == false }}
+    environment: ${{ github.ref_name }}
     runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
     steps:
     - name: Set up Node.js
@@ -82,6 +83,7 @@ jobs:
     name: init ubuntu
     if: ${{ inputs.ubuntu_runner == true }}
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name }}
     steps:
     - name: Set up Node.js
       uses: actions/setup-node@v4
@@ -91,7 +93,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: configure aws credentials
+    - name: Init Aws credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/${{ secrets.AWS_ROLE_NAME }}
