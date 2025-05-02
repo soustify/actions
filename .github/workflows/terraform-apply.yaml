@@ -29,15 +29,85 @@ on:
         required: false
         type: string
         default: 'terraform.tfstate'
-      runs_on:
+      ubuntu_runner:
         required: false
-        type: string
-        default: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
+        type: boolean
+        default: false
+
 jobs:
+  terraform-apply-ubuntu:
+    name: apply
+    if: ${{ inputs.ubuntu_runner == true }}
+    environment: ${{ github.ref_name }}
+    runs-on: 'ubuntu-latest'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+          node-version: '20'
+
+    - uses: hashicorp/setup-terraform@v3
+      name: setup
+      with:
+          terraform_version: "1.5.0"
+
+
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ vars.ACCOUNT_NUMBER_ENV }}:role/github-actions-${{ github.ref_name }}
+        role-session-name: github-actions-${{ github.ref_name }}
+        aws-region: 'us-east-1'
+
+    - name: Prepare Terraform plugin cache dir
+      run: mkdir -p ~/.terraform.d/plugin-cache
+
+    - name: Cache Terraform providers & modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+          terraform/.terraform
+        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+    - name: Terraform Init
+      working-directory: ${{ inputs.terraform_directory }}
+      run: |
+        terraform init -backend-config=bucket=${{ vars.TERRAFORM_BUCKET }} -backend-config=key=${{ github.event.repository.name }}/${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+
+
+    - name: Download files
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-vars
+        path: ${{ inputs.terraform_directory }}
+
+
+    - name: Check Has Changes
+      id: terraform_plan_has_changes
+      shell: bash
+      working-directory: ${{ inputs.terraform_directory }}
+      run: |
+        terraform apply -var-file=${{ inputs.values_file }} -auto-approve
+
   terraform-apply:
     name: apply
+    if: ${{ inputs.ubuntu_runner == false }}
     environment: ${{ github.ref_name }}
-    runs-on: ${{ inputs.runs_on }}
+    runs-on: ['${{ inputs.runner_name }}', '${{inputs.branch_name}}', '${{inputs.runner_category}}', "self-hosted", "linux", "x64", "amazon"]
     permissions:
       id-token: write
       contents: read
