@@ -78,7 +78,7 @@ jobs:
 
 
   terraform-init-ubuntu:
-    name: init
+    name: init ubuntu
     if: ${{ inputs.ubuntu_runner == true }}
     runs-on: ubuntu-latest
     steps:
@@ -117,7 +117,7 @@ jobs:
 
 
   terraform-plan:
-    name: init
+    name: plan
     needs: [ terraform-init ]
     if: ${{ inputs.ubuntu_runner == false }}
     environment: ${{ github.ref_name }}
@@ -175,7 +175,7 @@ jobs:
 
 
   terraform-plan-ubuntu:
-    name: init
+    name: plan ubuntu
     needs: [ terraform-init-ubuntu ]
     if: ${{ inputs.ubuntu_runner == true }}
     runs-on: ubuntu-latest
