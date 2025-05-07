@@ -14,6 +14,10 @@ inputs:
     description: 'Directory containing Terraform files'
     required: false
     default: ''
+  vars:
+    description: 'Terraform variables'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -26,13 +30,25 @@ runs:
       role-session-name: ${{ inputs.aws_role_name }}
       aws-region: ${{ inputs.aws_region }}
 
-  - name: Terraform destroy
-    if: ${{ inputs.terraform_directory != '' }}
+  - name: Terraform Destroy
+    if: ${{ inputs.terraform_directory != '' && inputs.vars == ''}}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
     run: terraform destroy -auto-approve
 
-  - name: Terraform destroy
-    if: ${{ inputs.terraform_directory == '' }}
+  - name: Terraform Destroy
+    if: ${{ inputs.terraform_directory == '' && inputs.vars != ''}}
+    shell: bash
+    run: terraform destroy -auto-approve -var-file=${{ inputs.vars }}
+
+
+  - name: Terraform Destroy
+    if: ${{ inputs.terraform_directory != '' && inputs.vars == '' }}
+    working-directory: ${{ inputs.terraform_directory }}
     shell: bash
     run: terraform destroy -auto-approve
+
+  - name: Terraform Destroy
+    if: ${{ inputs.terraform_directory == '' && inputs.vars != '' }}
+    shell: bash
+    run: terraform destroy -auto-approve -var-file=${{ inputs.vars }}

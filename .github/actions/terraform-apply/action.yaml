@@ -14,6 +14,11 @@ inputs:
     description: 'Directory containing Terraform files'
     required: false
     default: ''
+  vars:
+    description: 'Terraform variables'
+    required: false
+    default: ''
+
 
 runs:
   using: composite
@@ -27,12 +32,24 @@ runs:
       aws-region: ${{ inputs.aws_region }}
 
   - name: Terraform Apply
-    if: ${{ inputs.terraform_directory != '' }}
+    if: ${{ inputs.terraform_directory != '' && inputs.vars == ''}}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
     run: terraform apply -auto-approve
 
   - name: Terraform Apply
-    if: ${{ inputs.terraform_directory == '' }}
+    if: ${{ inputs.terraform_directory == '' && inputs.vars != ''}}
+    shell: bash
+    run: terraform apply -auto-approve -var-file=${{ inputs.vars }}
+
+
+  - name: Terraform Apply
+    if: ${{ inputs.terraform_directory != '' && inputs.vars == '' }}
+    working-directory: ${{ inputs.terraform_directory }}
     shell: bash
     run: terraform apply -auto-approve
+
+  - name: Terraform Apply
+    if: ${{ inputs.terraform_directory == '' && inputs.vars != '' }}
+    shell: bash
+    run: terraform apply -auto-approve -var-file=${{ inputs.vars }}
