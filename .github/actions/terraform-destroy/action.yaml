@@ -1,0 +1,38 @@
+name: 'Terraform Destroy'
+description: 'terraform destroy commands'
+inputs:
+  aws_account_number:
+    description: 'Account Number'
+    required: true
+  aws_role_name:
+    description: 'Aws role with polices to deploy'
+    required: true
+  aws_region:
+    description: 'Aws region'
+    required: true
+  terraform_directory:
+    description: 'Directory containing Terraform files'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+
+  - name: configure aws credentials
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+      role-session-name: ${{ inputs.aws_role_name }}
+      aws-region: ${{ inputs.aws_region }}
+
+  - name: Terraform destroy
+    if: ${{ inputs.terraform_directory != '' }}
+    working-directory: ${{ inputs.terraform_directory }}
+    shell: bash
+    run: terraform destroy -auto-approve
+
+  - name: Terraform destroy
+    if: ${{ inputs.terraform_directory == '' }}
+    shell: bash
+    run: terraform destroy -auto-approve
