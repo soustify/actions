@@ -61,7 +61,7 @@ runs:
         path: |
           ~/.terraform.d/plugin-cache
           terraform/.terraform
-        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
+        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}-${{ github.event.repository.name }}
         restore-keys: |
           ${{ runner.os }}-terraform-
 
