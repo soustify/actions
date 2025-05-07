@@ -28,32 +28,54 @@ inputs:
 runs:
   using: composite
   steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-  - name: Print
-    shell: bash
-    run: |
-      echo "Region: ${{ inputs.aws_region }}"
+    - name: Print
+      shell: bash
+      run: |
+        echo "Region: ${{ inputs.aws_region }}"
 
-  - name: configure aws credentials
-    uses: aws-actions/configure-aws-credentials@v4
-    with:
-      role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
-      role-session-name: ${{ inputs.aws_role_name }}
-      aws-region: ${{ inputs.aws_region }}
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ inputs.aws_account_number }}:role/${{ inputs.aws_role_name }}
+        role-session-name: ${{ inputs.aws_role_name }}
+        aws-region: ${{ inputs.aws_region }}
 
-  - name: Terraform Init
-    if: ${{ inputs.terraform_directory != '' }} # Executa apenas se terraform_directory não estiver vazio
-    shell: bash
-    run: |
-      cd ${{ inputs.terraform_directory }}
-      terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
-      ls -ltra
+    - name: Prepare Terraform plugin cache dir
+      if: ${{ inputs.terraform_directory != '' }}
+      working-directory: ${{ inputs.terraform_directory }}
+      run: mkdir -p ~/.terraform.d/plugin-cache
+      shell: bash
 
-  - name: Terraform Init
-    if: ${{ inputs.terraform_directory == '' }} # Executa apenas se terraform_directory não estiver vazio
-    shell: bash
-    run: |
-      terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+    - name: Prepare Terraform plugin cache dir root
+      if: ${{ inputs.terraform_directory == '' }}
+      working-directory: ${{ inputs.terraform_directory }}
+      run: mkdir -p ~/.terraform.d/plugin-cache
+      shell: bash
+
+    - name: Cache Terraform providers & modules
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.terraform.d/plugin-cache
+          terraform/.terraform
+        key: ${{ runner.os }}-terraform-${{ hashFiles('terraform/terraform.lock.hcl') }}
+        restore-keys: |
+          ${{ runner.os }}-terraform-
+
+
+    - name: Terraform Init
+      if: ${{ inputs.terraform_directory != '' }}
+      working-directory: ${{ inputs.terraform_directory }}
+      shell: bash
+      run: |
+        terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
+
+    - name: Terraform Init
+      if: ${{ inputs.terraform_directory == '' }} # Executa apenas se terraform_directory não estiver vazio
+      shell: bash
+      run: |
+        terraform init -backend-config=bucket=${{ inputs.terraform_bucket_name }} -backend-config=key=${{ inputs.terraform_state_file }} -backend-config=region=us-east-1
       
