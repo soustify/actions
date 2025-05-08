@@ -31,25 +31,25 @@ runs:
       role-session-name: ${{ inputs.aws_role_name }}
       aws-region: ${{ inputs.aws_region }}
 
-  - name: Terraform Apply
+  - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory != '' && inputs.vars == ''}}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
     run: terraform apply -auto-approve
 
-  - name: Terraform Apply
+  - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory == '' && inputs.vars != ''}}
     shell: bash
     run: terraform apply -auto-approve -var-file=${{ inputs.vars }}
 
 
-  - name: Terraform Apply
+  - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory != '' && inputs.vars == '' }}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
     run: terraform apply -auto-approve
 
-  - name: Terraform Apply
+  - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory == '' && inputs.vars != '' }}
     shell: bash
     run: terraform apply -auto-approve -var-file=${{ inputs.vars }}
