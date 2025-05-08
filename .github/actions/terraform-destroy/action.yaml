@@ -37,18 +37,17 @@ runs:
     run: terraform destroy -auto-approve
 
   - name: Terraform Destroy (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory == '' && inputs.vars != ''}}
-    shell: bash
-    run: terraform destroy -auto-approve -var-file=${{ inputs.vars }}
-
-
-  - name: Terraform Destroy (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory != '' && inputs.vars == '' }}
-    working-directory: ${{ inputs.terraform_directory }}
+    if: ${{ inputs.terraform_directory == '' && inputs.vars == ''}}
     shell: bash
     run: terraform destroy -auto-approve
 
   - name: Terraform Destroy (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
+    if: ${{ inputs.terraform_directory != '' && inputs.vars != '' }}
+    working-directory: ${{ inputs.terraform_directory }}
+    shell: bash
+    run: terraform destroy -var-file=${{ inputs.vars }} -auto-approve
+
+  - name: Terraform Destroy (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory == '' && inputs.vars != '' }}
     shell: bash
-    run: terraform destroy -auto-approve -var-file=${{ inputs.vars }}
+    run: terraform destroy -var-file=${{ inputs.vars }} -auto-approve

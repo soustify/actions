@@ -31,6 +31,7 @@ runs:
       role-session-name: ${{ inputs.aws_role_name }}
       aws-region: ${{ inputs.aws_region }}
 
+
   - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory != '' && inputs.vars == ''}}
     working-directory: ${{ inputs.terraform_directory }}
@@ -38,18 +39,18 @@ runs:
     run: terraform plan
 
   - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory == '' && inputs.vars != ''}}
+    if: ${{ inputs.terraform_directory == '' && inputs.vars == ''}}
     shell: bash
-    run: terraform plan -var-file=${{ inputs.vars }}
+    run: terraform plan
 
 
   - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory != '' && inputs.vars == '' }}
+    if: ${{ inputs.terraform_directory != '' && inputs.vars != '' }}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
-    run: terraform plan -auto-approve
+    run: terraform plan -auto-approve -var-file=${{ inputs.vars }}
 
   - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory == '' && inputs.vars != '' }}
     shell: bash
-    run: terraform plan -var-file=${{ inputs.vars }}
+    run: terraform plan -auto-approve -var-file=${{ inputs.vars }}

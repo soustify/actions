@@ -38,18 +38,17 @@ runs:
     run: terraform apply -auto-approve
 
   - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory == '' && inputs.vars != ''}}
-    shell: bash
-    run: terraform apply -auto-approve -var-file=${{ inputs.vars }}
-
-
-  - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory != '' && inputs.vars == '' }}
-    working-directory: ${{ inputs.terraform_directory }}
+    if: ${{ inputs.terraform_directory == '' && inputs.vars == ''}}
     shell: bash
     run: terraform apply -auto-approve
 
   - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
+    if: ${{ inputs.terraform_directory != '' && inputs.vars != '' }}
+    working-directory: ${{ inputs.terraform_directory }}
+    shell: bash
+    run: terraform apply -var-file=${{ inputs.vars }} -auto-approve
+
+  - name: Terraform Apply (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
     if: ${{ inputs.terraform_directory == '' && inputs.vars != '' }}
     shell: bash
-    run: terraform apply -auto-approve -var-file=${{ inputs.vars }}
+    run: terraform apply -var-file=${{ inputs.vars }} -auto-approve
