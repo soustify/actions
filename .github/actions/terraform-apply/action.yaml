@@ -34,9 +34,9 @@ runs:
     if: ${{ inputs.terraform_directory != '' }}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
-    run: terraform apply -auto-approve ${{post_script}}
+    run: terraform apply -auto-approve ${{inputs.post_script}}
 
   - name: Terraform Apply (${{ inputs.terraform_directory != '' }})
     if: ${{ inputs.terraform_directory == '' }}
     shell: bash
-    run: terraform apply -auto-approve ${{post_script}}
+    run: terraform apply -auto-approve ${{inputs.post_script}}

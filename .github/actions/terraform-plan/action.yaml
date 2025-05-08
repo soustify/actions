@@ -35,9 +35,9 @@ runs:
     if: ${{ inputs.terraform_directory != '' }}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
-    run: terraform plan ${{post_script}}
+    run: terraform plan ${{inputs.post_script}}
 
   - name: Terraform Plan (${{ inputs.terraform_directory != '' }})
     if: ${{ inputs.terraform_directory == '' }}
     shell: bash
-    run: terraform plan ${{post_script}}
+    run: terraform plan ${{inputs.post_script}}
