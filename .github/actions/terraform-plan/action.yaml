@@ -14,7 +14,7 @@ inputs:
     description: 'Directory containing Terraform files'
     required: false
     default: ''
-  vars:
+  post_script:
     description: 'Terraform variables'
     required: false
     default: ''
@@ -31,26 +31,13 @@ runs:
       role-session-name: ${{ inputs.aws_role_name }}
       aws-region: ${{ inputs.aws_region }}
 
-
   - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory != '' && inputs.vars == ''}}
+    if: ${{ inputs.terraform_directory != '' }}
     working-directory: ${{ inputs.terraform_directory }}
     shell: bash
-    run: terraform plan
+    run: terraform plan ${{post_script}}
 
   - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory == '' && inputs.vars == ''}}
+    if: ${{ inputs.terraform_directory == '' }}
     shell: bash
-    run: terraform plan
-
-
-  - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory != '' && inputs.vars != '' }}
-    working-directory: ${{ inputs.terraform_directory }}
-    shell: bash
-    run: terraform plan -auto-approve -var-file=${{ inputs.vars }}
-
-  - name: Terraform Plan (${{ inputs.terraform_directory != '' && inputs.vars == ''}})
-    if: ${{ inputs.terraform_directory == '' && inputs.vars != '' }}
-    shell: bash
-    run: terraform plan -auto-approve -var-file=${{ inputs.vars }}
+    run: terraform plan ${{post_script}}
