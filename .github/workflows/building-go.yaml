@@ -130,4 +130,9 @@ jobs:
       - name: Upload Aws S3
         if: inputs.is_lambda == true
         run: |
-          aws s3 cp artifact-builded.zip "s3://${{secrets.LAMBDA_BUCKET}}/${{ github.event.repository.name }}/${{ inputs.artifact_name }}.zip"
+          VERSION_ID=$(aws s3api put-object \
+            --bucket "${{secrets.LAMBDA_BUCKET}}" \
+            --key "${{ github.event.repository.name }}/${{ inputs.artifact_name }}.zip" \
+            --body artifact-builded.zip \
+            --query VersionId --output text)
+          echo "VersionId => $VERSION_ID"
