@@ -10,12 +10,14 @@ inputs:
   aws_region:
     description: 'Aws region'
     required: true
-  artifact_name:
-    description: 'Artifact Name'
-    required: true
-    default: 'terraform'
-
-
+  terraform_directory:
+    description: 'Directory containing Terraform files'
+    required: false
+    default: ''
+  post_script:
+    description: 'Terraform script'
+    required: false
+    default: ''
 
 
 runs:
@@ -29,8 +31,13 @@ runs:
       role-session-name: ${{ inputs.aws_role_name }}
       aws-region: ${{ inputs.aws_region }}
 
-  - name: Terraform Apply
+  - name: Terraform Plan (${{ inputs.terraform_directory != '' }})
+    if: ${{ inputs.terraform_directory != '' }}
+    working-directory: ${{ inputs.terraform_directory }}
     shell: bash
-    run: |
-      cd terraform
-      terraform plan
+    run: terraform plan ${{inputs.post_script}}
+
+  - name: Terraform Plan (${{ inputs.terraform_directory != '' }})
+    if: ${{ inputs.terraform_directory == '' }}
+    shell: bash
+    run: terraform plan ${{inputs.post_script}}
