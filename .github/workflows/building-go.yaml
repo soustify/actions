@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload Aws S3
         id: upload_s3
-        if: inputs.is_lambda == 'true'
+        if: inputs.is_lambda == true
         run: |
           VERSION_ID=$(aws s3api put-object \
             --bucket "${{ secrets.LAMBDA_BUCKET }}" \
@@ -139,7 +139,7 @@ jobs:
           echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
 
       - name: Atualizar/Inserir Parameter Store
-        if: inputs.is_lambda == 'true'
+        if: inputs.is_lambda == true
         run: |
           aws ssm put-parameter \
             --name "/${{ github.event.repository.name }}/infrastructure/version_id" \
