@@ -128,11 +128,21 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Upload Aws S3
-        if: inputs.is_lambda == true
+        id: upload_s3
+        if: inputs.is_lambda == 'true'
         run: |
           VERSION_ID=$(aws s3api put-object \
-            --bucket "${{secrets.LAMBDA_BUCKET}}" \
+            --bucket "${{ secrets.LAMBDA_BUCKET }}" \
             --key "${{ github.event.repository.name }}/${{ inputs.artifact_name }}.zip" \
             --body artifact-builded.zip \
             --query VersionId --output text)
-          echo "VersionId => $VERSION_ID"
+          echo "version_id=$VERSION_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Atualizar/Inserir Parameter Store
+        if: inputs.is_lambda == 'true'
+        run: |
+          aws ssm put-parameter \
+            --name "/${{ github.event.repository.name }}/infrastructure/version_id" \
+            --value "${{ steps.upload_s3.outputs.version_id }}" \
+            --type String \
+            --overwrite
